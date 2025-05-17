@@ -320,12 +320,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 754674389}
   snakeController: {fileID: 754674392}
-  height: 7
+  height: 5
   topDownBackwardOffset: 10
-  firstPersonOffset: {x: 0, y: 0.2, z: 0.3}
+  firstPersonOffset: {x: 0, y: 0.2, z: 1}
   firstPersonThreshold: 0.5
-  positionSmoothSpeed: 2
-  rotationSmoothSpeed: 2
+  positionSmoothSpeed: 5
+  rotationSmoothSpeed: 5
 --- !u!1 &339058793
 GameObject:
   m_ObjectHideFlags: 0
