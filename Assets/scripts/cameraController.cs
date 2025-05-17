@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Контролирует камеру, следующую за целью (головой змейки).
 /// Позволяет настраивать высоту, плавность и переключаться в режим, подобный первому лицу.
+/// Также позволяет смещать камеру в режиме вида сверху для лучшего обзора вперед.
 /// </summary>
 public class CameraController : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class CameraController : MonoBehaviour
     [Header("Позиционирование Камеры")]
     [Tooltip("Желаемая высота камеры над целью в режиме вида сверху.")]
     public float height = 5f; // Желаемая высота камеры над целью
+
+    [Tooltip("Смещение камеры назад в режиме вида сверху для создания наклона вперед. Положительное значение смещает камеру назад от направления движения.")]
+    public float topDownBackwardOffset = 2f; // Новое поле для смещения камеры назад
 
     [Tooltip("Смещение от точки опоры цели в режиме от первого лица (локальные координаты). X: вбок, Y: вверх/вниз, Z: вперед/назад.")]
     public Vector3 firstPersonOffset = new Vector3(0f, 0.2f, 0.3f); // например, немного выше и впереди точки опоры
@@ -88,7 +92,8 @@ public class CameraController : MonoBehaviour
 
         Vector3 desiredPosition;
         Quaternion desiredRotation;
-// Определяем режим камеры (от первого лица или вид сверху)
+
+        // Определяем режим камеры (от первого лица или вид сверху)
         if (height <= firstPersonThreshold)
         {
             // --- Режим от первого лица или очень близкий вид ---
@@ -103,16 +108,19 @@ public class CameraController : MonoBehaviour
         else
         {
             // --- Режим вида сверху ---
-            // Камера располагается прямо над целью на заданной высоте
-            desiredPosition = target.position + Vector3.up * height;
+            // Камера располагается на заданной высоте и смещается назад от направления движения змейки,
+            // чтобы создать наклон вперед и улучшить обзор.
+            desiredPosition = target.position + (Vector3.up * height) - (snakeWorldForward * topDownBackwardOffset);
 
-            // Камера смотрит вниз на цель.
+            // Камера смотрит на цель.
             // Ее 'верх' (локальная ось Y камеры) ориентируется по направлению движения змейки (snakeWorldForward).
-            // Это позволяет камере поворачиваться вместе со змейкой, сохраняя вид сверху.
+            // Это позволяет камере поворачиваться вместе со змейкой, сохраняя вид сверху с наклоном.
             Vector3 directionToTarget = (target.position - desiredPosition).normalized;
             if (directionToTarget == Vector3.zero)
             {
-                directionToTarget = -Vector3.up; // Избегаем нулевого вектора, если камера уже в позиции цели
+                // Если камера каким-то образом оказалась точно в позиции цели (маловероятно с offset),
+                // смотрим немного вниз, чтобы избежать проблем с LookRotation.
+                directionToTarget = -Vector3.up;
             }
             desiredRotation = Quaternion.LookRotation(directionToTarget, snakeWorldForward);
         }
