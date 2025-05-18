@@ -1,4 +1,7 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Контролирует камеру, следующую за целью (головой змейки).
@@ -16,7 +19,7 @@ public class CameraController : MonoBehaviour
 
     [Header("Позиционирование Камеры")]
     [Tooltip("Желаемая высота камеры над целью в режиме вида сверху.")]
-    public float height = 5f; // Желаемая высота камеры над целью
+    public float height = 4f; // Желаемая высота камеры над целью
 
     [Tooltip("Смещение камеры назад в режиме вида сверху для создания наклона вперед. Положительное значение смещает камеру назад от направления движения.")]
     public float topDownBackwardOffset = 2f; // Новое поле для смещения камеры назад
@@ -137,6 +140,25 @@ public class CameraController : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, desiredPosition, positionSmoothSpeed * Time.deltaTime);
             // Плавное изменение поворота
             transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSmoothSpeed * Time.deltaTime);
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            switch (height)
+            {
+                case 0:
+                    height = 4f;
+                    break;
+                case 4:
+                    height = 8;
+                    break;
+                case 8:
+                    height = 0;
+                    break;
+            }
         }
     }
 }

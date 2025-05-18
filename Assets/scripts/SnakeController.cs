@@ -1,27 +1,32 @@
-﻿// Файл: SnakeController.cs
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SnakeController : MonoBehaviour
 {
     [Header("Настройки Движения")]
     public float moveSpeed = 5f;
     public float headRotationSpeed = 10f; // Скорость поворота головы
-
+    
     [Header("Настройки Тела")]
     public GameObject bodyPrefab;
     public float bodySpacing = 0.5f; // Желаемое расстояние между сегментами
+    public int oneAppleBoost = 4; // на сколько змейка увеличивается, схуярив одно яблоко
 
     [Header("Публичные Состояния (для других скриптов)")]
     public Vector3 moveDirection = Vector3.forward; // Стартовое и текущее целевое направление движения
 
+    public Text countText;
+
     private List<Transform> bodyParts = new List<Transform>();
     private List<Vector3> positionsHistory = new List<Vector3>();
     private float distanceToRecordPosition;
+    private int count = 0;
 
     void Start()
     {
+
         // 1. Позиционируем змейку на полу
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f))
@@ -224,8 +229,15 @@ public class SnakeController : MonoBehaviour
     {
         if (other.CompareTag("Apple"))
         {
-            Destroy(other.gameObject); 
-            AddBodyPart();            
+            for (int i = oneAppleBoost; i > 0; i--)
+            {
+                AddBodyPart();
+            }
+            Destroy(other.gameObject);
+            moveSpeed += 0.25f;
+            count++;
+            countText.text = count.ToString();
+            
             AppleSpawner spawner = FindObjectOfType<AppleSpawner>();
             if (spawner != null) spawner.SpawnApple(); 
             else Debug.LogWarning("AppleSpawner не найден на сцене!");
